@@ -37,6 +37,7 @@ class AwsomeVideoPlayer extends StatefulWidget {
     this.onnetwork,
     this.onfullscreen,
     this.onpop,
+    this.isLandscape = false,
   })  : playOptions = playOptions ?? VideoPlayOptions(),
         videoStyle = videoStyle ?? VideoStyle(),
         super(key: key);
@@ -48,6 +49,9 @@ class AwsomeVideoPlayer extends StatefulWidget {
   final VideoPlayOptions playOptions;
   final VideoStyle videoStyle;
   final List<Widget> children;
+
+  ///是否要开启全屏展示
+  final bool isLandscape;
 
   /// 初始化完成回调事件
   final VideoCallback<VideoPlayerController> oninit;
@@ -95,7 +99,7 @@ class _AwsomeVideoPlayerState extends State<AwsomeVideoPlayer>
   Animation<double> controlBottomBarAnimation;
 
   /// 是否全屏
-  bool fullscreened = false;
+  bool fullscreened = false;//
   bool initialized = false;
 
   /// 屏幕亮度
@@ -122,7 +126,6 @@ class _AwsomeVideoPlayerState extends State<AwsomeVideoPlayer>
   @override
   void initState() {
     super.initState();
-
     /// 控制拦动画
     controlBarAnimationController = AnimationController(
         duration: const Duration(milliseconds: 300), vsync: this);
@@ -176,13 +179,22 @@ class _AwsomeVideoPlayerState extends State<AwsomeVideoPlayer>
         widget.onnetwork(result.toString().split('.')[1]);
       }
     });
+    ///判断 是否需要全屏播放
+    if(widget.isLandscape){
+      ///运行设备横屏
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    }else{
+      ///运行设备竖屏
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    }
 
-    ///运行设备横竖屏
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
     // 常亮
     Screen.keepOn(true);
 
@@ -333,6 +345,15 @@ class _AwsomeVideoPlayerState extends State<AwsomeVideoPlayer>
   /// 点击全屏或取消
   void toggleFullScreen() {
     if (fullscreened) {
+      OrientationPlugin.forceOrientation(DeviceOrientation.portraitUp);
+    } else {
+      OrientationPlugin.forceOrientation(DeviceOrientation.landscapeRight);
+    }
+  }
+
+  /// 点击全屏或取消
+  void FullScreen() {
+    if (widget.isLandscape) {
       OrientationPlugin.forceOrientation(DeviceOrientation.portraitUp);
     } else {
       OrientationPlugin.forceOrientation(DeviceOrientation.landscapeRight);
